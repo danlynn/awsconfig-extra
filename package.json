@@ -1,0 +1,20 @@
+{
+  "name": "awsconfig-extra",
+  "version": "1.0.1",
+  "description": "Common function to get aws config attributes for accessKeyId, secretAccessKey, region.",
+  "files": [
+    "bin"
+  ],
+  "main": "bin/awsconfig_extra.js",
+  "scripts": {
+    "build": "npm install && npm run transpile",
+    "transpile": "babel --presets es2015 src --out-dir bin",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-preset-es2015": "^6.24.1"
+  },
+  "author": "git@danlynn.org",
+  "license": "MIT"
+}
