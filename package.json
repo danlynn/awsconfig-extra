@@ -1,6 +1,6 @@
 {
   "name": "awsconfig-extra",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "Common function to get aws config attributes for accessKeyId, secretAccessKey, and region.",
   "files": [
     "bin"
