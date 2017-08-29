@@ -39,17 +39,21 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * credentials from the account that it is running within.
  *
  * @param [options] {{[accessKeyId]: string, [secretAccessKey]: string, [region]: string}} command line options object
+ * @param [verbose] {boolean} true to output all the config it found and where
  * @returns {{accessKeyId: string, secretAccessKey: string, region: string}} object with aws config attributes
  */
 function awsConfig() {
   var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+  var verbose = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
   var credentialsFile = void 0;
   try {
     credentialsFile = _fs2.default.readFileSync('.aws/credentials', "utf8");
+    if (verbose) console.log('=== read .aws/credentials: success:\n' + credentialsFile);
   } catch (error) {
     try {
       credentialsFile = _fs2.default.readFileSync(process.env['HOME'] + '/.aws/credentials', "utf8");
+      if (verbose) console.log('=== read ' + process.env['HOME'] + '/.aws/credentials: success:\n' + credentialsFile);
     } catch (error) {}
   }
   var accessKeyIdMatch = credentialsFile && credentialsFile.match(/aws_access_key_id\s*=\s*(.*)/);
@@ -58,9 +62,11 @@ function awsConfig() {
   var configFile = void 0;
   try {
     configFile = _fs2.default.readFileSync('.aws/config', "utf8");
+    if (verbose) console.log('=== read .aws/config: success:\n' + configFile);
   } catch (error) {
     try {
       configFile = _fs2.default.readFileSync(process.env['HOME'] + '/.aws/config', "utf8");
+      if (verbose) console.log('=== read ' + process.env['HOME'] + '/.aws/config: success:\n' + configFile);
     } catch (error) {}
   }
   var regionMatch = configFile && configFile.match(/region\s*=\s*(.*)/);
@@ -69,10 +75,17 @@ function awsConfig() {
   var secretAccessKey = options && options.secretAccessKey || process.env.SECRET_ACCESS_KEY || secretAccessKeyMatch && secretAccessKeyMatch[1];
   var region = options && options.region || process.env.REGION || regionMatch && regionMatch[1];
 
+  if (verbose) {
+    console.log('=== accessKeyId:\n      cli:  ' + (options && options.accessKeyId) + '\n      env:  ' + process.env.ACCESS_KEY_ID + '\n      file: ' + (accessKeyIdMatch && accessKeyIdMatch[1]) + '\n      pick: ' + accessKeyId);
+    console.log('=== secretAccessKey:\n      cli:  ' + (options && options.secretAccessKey) + '\n      env:  ' + process.env.SECRET_ACCESS_KEY + '\n      file: ' + (secretAccessKeyMatch && secretAccessKeyMatch[1]) + '\n      pick: ' + secretAccessKey);
+    console.log('=== region:\n      cli:  ' + (options && options.region) + '\n      env:  ' + process.env.REGION + '\n      file: ' + (regionMatch && regionMatch[1]) + '\n      pick: ' + region);
+  }
+
   var awsAuth = {};
   if (accessKeyId) Object.assign(awsAuth, { accessKeyId: accessKeyId });
   if (secretAccessKey) Object.assign(awsAuth, { secretAccessKey: secretAccessKey });
   if (region) Object.assign(awsAuth, { region: region });
   if (Object.keys(awsAuth).length === 0) awsAuth = null; // not needed if running within aws environment already
+  if (verbose) console.log('=== returning:\n' + JSON.stringify(awsAuth, null, 2));
   return awsAuth;
 }
