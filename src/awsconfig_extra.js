@@ -29,18 +29,21 @@ import fs from 'fs'
  * credentials from the account that it is running within.
  *
  * @param [options] {{[accessKeyId]: string, [secretAccessKey]: string, [region]: string}} command line options object
+ * @param [verbose] {boolean} true to output all the config it found and where
  * @returns {{accessKeyId: string, secretAccessKey: string, region: string}} object with aws config attributes
  */
-export default function awsConfig(options = null) {
+export default function awsConfig(options = null, verbose = false) {
   let credentialsFile
   try {
     credentialsFile = fs.readFileSync('.aws/credentials', "utf8")
-    console.log(`=== read .aws/credentials: success:\n${credentialsFile}`)
+    if (verbose)
+      console.log(`=== read .aws/credentials: success:\n${credentialsFile}`)
   }
   catch (error) {
     try {
       credentialsFile = fs.readFileSync(`${process.env['HOME']}/.aws/credentials`, "utf8")
-      console.log(`=== read ${process.env['HOME']}/.aws/credentials: success:\n${credentialsFile}`)
+      if (verbose)
+        console.log(`=== read ${process.env['HOME']}/.aws/credentials: success:\n${credentialsFile}`)
     }
     catch (error) {}
   }
@@ -50,12 +53,14 @@ export default function awsConfig(options = null) {
   let configFile
   try {
     configFile = fs.readFileSync('.aws/config', "utf8")
-    console.log(`=== read .aws/config: success:\n${configFile}`)
+    if (verbose)
+      console.log(`=== read .aws/config: success:\n${configFile}`)
   }
   catch (error) {
     try {
       configFile = fs.readFileSync(`${process.env['HOME']}/.aws/config`, "utf8")
-      console.log(`=== read ${process.env['HOME']}/.aws/config: success:\n${configFile}`)
+      if (verbose)
+        console.log(`=== read ${process.env['HOME']}/.aws/config: success:\n${configFile}`)
     }
     catch (error) {}
   }
@@ -65,9 +70,11 @@ export default function awsConfig(options = null) {
   const secretAccessKey = (options && options.secretAccessKey) || process.env.SECRET_ACCESS_KEY || (secretAccessKeyMatch && secretAccessKeyMatch[1])
   const region = (options && options.region) || process.env.REGION || (regionMatch && regionMatch[1])
 
-  console.log(`=== accessKeyId:\n      cli:  ${options && options.accessKeyId}\n      env:  ${process.env.ACCESS_KEY_ID}\n      file: ${accessKeyIdMatch && accessKeyIdMatch[1]}\n      pick: ${accessKeyId}`)
-  console.log(`=== secretAccessKey:\n      cli:  ${options && options.secretAccessKey}\n      env:  ${process.env.SECRET_ACCESS_KEY}\n      file: ${secretAccessKeyMatch && secretAccessKeyMatch[1]}\n      pick: ${secretAccessKey}`)
-  console.log(`=== region:\n      cli:  ${options && options.region}\n      env:  ${process.env.REGION}\n      file: ${regionMatch && regionMatch[1]}\n      pick: ${region}`)
+  if (verbose) {
+    console.log(`=== accessKeyId:\n      cli:  ${options && options.accessKeyId}\n      env:  ${process.env.ACCESS_KEY_ID}\n      file: ${accessKeyIdMatch && accessKeyIdMatch[1]}\n      pick: ${accessKeyId}`)
+    console.log(`=== secretAccessKey:\n      cli:  ${options && options.secretAccessKey}\n      env:  ${process.env.SECRET_ACCESS_KEY}\n      file: ${secretAccessKeyMatch && secretAccessKeyMatch[1]}\n      pick: ${secretAccessKey}`)
+    console.log(`=== region:\n      cli:  ${options && options.region}\n      env:  ${process.env.REGION}\n      file: ${regionMatch && regionMatch[1]}\n      pick: ${region}`)
+  }
 
   let awsAuth = {}
   if (accessKeyId)
@@ -78,6 +85,7 @@ export default function awsConfig(options = null) {
     Object.assign(awsAuth, {region: region})
   if (Object.keys(awsAuth).length === 0)
     awsAuth = null // not needed if running within aws environment already
-  console.log(`=== returning:\n${JSON.stringify(awsAuth, null, 2)}`)
+  if (verbose)
+    console.log(`=== returning:\n${JSON.stringify(awsAuth, null, 2)}`)
   return awsAuth
 }
